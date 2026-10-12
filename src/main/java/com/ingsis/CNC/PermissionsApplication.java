@@ -8,6 +8,7 @@ public class PermissionsApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PermissionsApplication.class, args);
+		System.out.println("Running...");
 	}
 
 }

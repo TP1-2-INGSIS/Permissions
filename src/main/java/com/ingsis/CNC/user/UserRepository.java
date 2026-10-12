@@ -1,4 +1,4 @@
-package com.ingsis.CNC.auth;
+package com.ingsis.CNC.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface AuthRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     Optional<User> findByUserName(String userName);
     List<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(String userName, String email);

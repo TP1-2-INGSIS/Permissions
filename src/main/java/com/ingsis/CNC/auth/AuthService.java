@@ -1,32 +1,36 @@
 package com.ingsis.CNC.auth;
 
+import com.ingsis.CNC.auth.dto.LoginRequest;
 import com.ingsis.CNC.auth.dto.RegisterRequest;
-import com.ingsis.CNC.auth.dto.RegisterResponse;
+import com.ingsis.CNC.auth.dto.AuthResponse;
+import com.ingsis.CNC.user.UserRepository;
+import com.ingsis.CNC.user.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AuthService {
-    private final AuthRepository authRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public AuthService(AuthRepository authRepository) {
-        this.authRepository = authRepository;
+    public AuthService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public RegisterResponse register(RegisterRequest request) {
-        User user = new User(request.getUserName(), request.getEmail(), request.getPassword());
-        User saved = authRepository.save(user);
-        return new RegisterResponse(saved.getId(), saved.getUserName(), saved.getEmail());
+    public AuthResponse register(RegisterRequest request) {
+        String hashedPassword = encoder.encode(request.password());
+        User user = new User(request.userName(), request.email(), hashedPassword);
+        User saved = userRepository.save(user);
+        return new AuthResponse(saved.getId(), saved.getUserName(), saved.getEmail());
     }
 
-    public Optional<User> findById(UUID id) {
-        return authRepository.findById(id);
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.email()).orElseThrow();
+        if (!encoder.matches(request.password(), user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        return new AuthResponse(user.getId(), user.getUserName(), user.getEmail());
     }
 
-    public List<User> searchUsers(String query) {
-        return authRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(query, query);
-    }
 }

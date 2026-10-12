@@ -1,7 +1,9 @@
 package com.ingsis.CNC.auth;
 
+import com.ingsis.CNC.auth.dto.LoginRequest;
 import com.ingsis.CNC.auth.dto.RegisterRequest;
-import com.ingsis.CNC.auth.dto.RegisterResponse;
+import com.ingsis.CNC.auth.dto.AuthResponse;
+import com.ingsis.CNC.user.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +19,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(service.register(request));
     }
 
-    @GetMapping("/users")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam(value = "query", defaultValue = "") String query) {
-        return ResponseEntity.ok(service.searchUsers(query));
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
+        return ResponseEntity.ok(service.login(request));
     }
+
 }

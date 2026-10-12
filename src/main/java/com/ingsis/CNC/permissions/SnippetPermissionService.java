@@ -24,37 +24,37 @@ public class SnippetPermissionService {
 
     @Transactional
     public SnippetPermissionResponse createOrUpdatePermission(CreatePermissionRequest request) {
-        SnippetPermission permission = repository.findByUserIdAndSnippetId(request.getUserId(), request.getSnippetId())
+        SnippetPermission permission = repository.findByUserIdAndSnippetId(request.userId(), request.snippetId())
                 .map(existing -> {
-                    existing.setRole(request.getRole());
+                    existing.setRole(request.snippetRole());
                     return existing;
                 })
-                .orElseGet(() -> new SnippetPermission(request.getUserId(), request.getSnippetId(), request.getRole()));
+                .orElseGet(() -> new SnippetPermission(request.userId(), request.snippetId(), request.snippetRole()));
 
         SnippetPermission saved = repository.save(permission);
-        return SnippetPermissionResponse.fromEntity(saved);
+        return toResponse(saved);
     }
 
     @Transactional
     public SnippetPermissionResponse shareSnippet(ShareSnippetRequest request) {
-        SnippetPermission ownerPermission = repository.findByUserIdAndSnippetId(request.getOwnerId(), request.getSnippetId())
+        SnippetPermission ownerPermission = repository.findByUserIdAndSnippetId(request.ownerId(), request.snippetId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Owner not found or has no access"));
 
         if (ownerPermission.getRole() != SnippetRole.OWNER) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the owner can share this snippet");
         }
 
-        SnippetPermission guestPermission = repository.findByUserIdAndSnippetId(request.getTargetUserId(), request.getSnippetId())
+        SnippetPermission guestPermission = repository.findByUserIdAndSnippetId(request.targetUserId(), request.snippetId())
                 .map(existing -> {
                     if (existing.getRole() != SnippetRole.OWNER) {
                         existing.setRole(SnippetRole.GUEST);
                     }
                     return existing;
                 })
-                .orElseGet(() -> new SnippetPermission(request.getTargetUserId(), request.getSnippetId(), SnippetRole.GUEST));
+                .orElseGet(() -> new SnippetPermission(request.targetUserId(), request.snippetId(), SnippetRole.GUEST));
 
         SnippetPermission saved = repository.save(guestPermission);
-        return SnippetPermissionResponse.fromEntity(saved);
+        return toResponse(saved);
     }
 
     public List<UUID> getSnippetIdsByUser(UUID userId, SnippetRole role) {
@@ -71,7 +71,17 @@ public class SnippetPermissionService {
 
     public Optional<SnippetPermissionResponse> getPermission(UUID userId, UUID snippetId) {
         return repository.findByUserIdAndSnippetId(userId, snippetId)
-                .map(SnippetPermissionResponse::fromEntity);
+                .map(this::toResponse);
+    }
+
+    private SnippetPermissionResponse toResponse(SnippetPermission permission) {
+        return new SnippetPermissionResponse(
+                permission.getId(),
+                permission.getUserId(),
+                permission.getSnippetId(),
+                permission.getRole(),
+                permission.getCreatedAt()
+        );
     }
 
     public boolean canRead(UUID userId, UUID snippetId) {

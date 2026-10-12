@@ -1,4 +1,4 @@
-package com.ingsis.CNC.auth;
+package com.ingsis.CNC.user;
 
 import jakarta.persistence.*;
 import java.util.UUID;
