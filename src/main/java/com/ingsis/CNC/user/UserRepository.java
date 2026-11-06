@@ -3,6 +3,7 @@ package com.ingsis.CNC.user;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
   List<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
       String userName, String email);
+
+  List<User> findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+      String userName, String email, Pageable pageable);
 }

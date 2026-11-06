@@ -8,15 +8,14 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SnippetPermissionRepository extends JpaRepository<SnippetPermission, UUID> {
-  Optional<SnippetPermission> findByUserIdAndSnippetId(UUID userId, UUID snippetId);
 
-  List<SnippetPermission> findAllByUserId(UUID userId);
+  Optional<SnippetPermission> findByUserIdAndSnippetId(String userId, UUID snippetId);
 
-  List<SnippetPermission> findAllByUserIdAndRole(UUID userId, SnippetRole role);
+  List<SnippetPermission> findAllByUserId(String userId);
+
+  List<SnippetPermission> findAllByUserIdAndRole(String userId, SnippetRole role);
 
   List<SnippetPermission> findAllBySnippetId(UUID snippetId);
-
-  void deleteByUserIdAndSnippetId(UUID userId, UUID snippetId);
 
   void deleteAllBySnippetId(UUID snippetId);
 }

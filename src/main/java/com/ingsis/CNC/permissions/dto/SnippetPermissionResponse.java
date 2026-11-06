@@ -5,4 +5,4 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record SnippetPermissionResponse(
-    UUID id, UUID userId, UUID snippetId, SnippetRole role, LocalDateTime createdAt) {}
+    UUID id, String userId, UUID snippetId, SnippetRole role, LocalDateTime createdAt) {}

@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class SnippetPermission {
   private UUID id;
 
   @Column(name = "user_id", nullable = false)
-  private UUID userId;
+  private String userId;
 
   @Column(name = "snippet_id", nullable = false)
   private UUID snippetId;
@@ -36,27 +37,36 @@ public class SnippetPermission {
   @Column(name = "role", nullable = false, length = 32)
   private SnippetRole role;
 
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt = LocalDateTime.now();
 
   public SnippetPermission() {}
 
-  public SnippetPermission(UUID userId, UUID snippetId, SnippetRole role) {
+  public SnippetPermission(String userId, UUID snippetId, SnippetRole role) {
     this.userId = userId;
     this.snippetId = snippetId;
     this.role = role;
     this.createdAt = LocalDateTime.now();
   }
 
+  @PrePersist
+  protected void onCreate() {
+    createdAt = LocalDateTime.now();
+  }
+
   public UUID getId() {
     return id;
   }
 
-  public UUID getUserId() {
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public String getUserId() {
     return userId;
   }
 
-  public void setUserId(UUID userId) {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 
