@@ -3,66 +3,71 @@ package com.ingsis.CNC.permissions;
 import com.ingsis.CNC.permissions.dto.CreatePermissionRequest;
 import com.ingsis.CNC.permissions.dto.ShareSnippetRequest;
 import com.ingsis.CNC.permissions.dto.SnippetPermissionResponse;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/permissions")
 public class SnippetPermissionController {
 
-    private final SnippetPermissionService service;
+  private final SnippetPermissionService service;
 
-    public SnippetPermissionController(SnippetPermissionService service) {
-        this.service = service;
-    }
+  public SnippetPermissionController(SnippetPermissionService service) {
+    this.service = service;
+  }
 
-    @PostMapping
-    public ResponseEntity<SnippetPermissionResponse> createPermission(@RequestBody CreatePermissionRequest request) {
-        return ResponseEntity.ok(service.createOrUpdatePermission(request));
-    }
+  @PostMapping
+  public ResponseEntity<SnippetPermissionResponse> createPermission(
+      @RequestBody CreatePermissionRequest request) {
+    return ResponseEntity.ok(service.createOrUpdatePermission(request));
+  }
 
-    @PostMapping("/share")
-    public ResponseEntity<SnippetPermissionResponse> shareSnippet(@RequestBody ShareSnippetRequest request) {
-        return ResponseEntity.ok(service.shareSnippet(request));
-    }
+  @PostMapping("/share")
+  public ResponseEntity<SnippetPermissionResponse> shareSnippet(
+      @RequestBody ShareSnippetRequest request) {
+    return ResponseEntity.ok(service.shareSnippet(request));
+  }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UUID>> getSnippetsForUser(
-            @PathVariable UUID userId,
-            @RequestParam(required = false) SnippetRole role) {
-        return ResponseEntity.ok(service.getSnippetIdsByUser(userId, role));
-    }
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<List<UUID>> getSnippetsForUser(
+      @PathVariable UUID userId, @RequestParam(required = false) SnippetRole role) {
+    return ResponseEntity.ok(service.getSnippetIdsByUser(userId, role));
+  }
 
-    @GetMapping("/check")
-    public ResponseEntity<SnippetPermissionResponse> getPermission(
-            @RequestParam UUID userId,
-            @RequestParam UUID snippetId) {
-        return service.getPermission(userId, snippetId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+  @GetMapping("/check")
+  public ResponseEntity<SnippetPermissionResponse> getPermission(
+      @RequestParam UUID userId, @RequestParam UUID snippetId) {
+    return service
+        .getPermission(userId, snippetId)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+  }
 
-    @GetMapping("/can-read")
-    public ResponseEntity<Map<String, Boolean>> canRead(
-            @RequestParam UUID userId,
-            @RequestParam UUID snippetId) {
-        return ResponseEntity.ok(Map.of("canRead", service.canRead(userId, snippetId)));
-    }
+  @GetMapping("/can-read")
+  public ResponseEntity<Map<String, Boolean>> canRead(
+      @RequestParam UUID userId, @RequestParam UUID snippetId) {
+    return ResponseEntity.ok(Map.of("canRead", service.canRead(userId, snippetId)));
+  }
 
-    @GetMapping("/can-write")
-    public ResponseEntity<Map<String, Boolean>> canWrite(
-            @RequestParam UUID userId,
-            @RequestParam UUID snippetId) {
-        return ResponseEntity.ok(Map.of("canWrite", service.canWrite(userId, snippetId)));
-    }
+  @GetMapping("/can-write")
+  public ResponseEntity<Map<String, Boolean>> canWrite(
+      @RequestParam UUID userId, @RequestParam UUID snippetId) {
+    return ResponseEntity.ok(Map.of("canWrite", service.canWrite(userId, snippetId)));
+  }
 
-    @DeleteMapping("/snippet/{snippetId}")
-    public ResponseEntity<Void> deleteSnippetPermissions(@PathVariable UUID snippetId) {
-        service.deletePermissionsForSnippet(snippetId);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/snippet/{snippetId}")
+  public ResponseEntity<Void> deleteSnippetPermissions(@PathVariable UUID snippetId) {
+    service.deletePermissionsForSnippet(snippetId);
+    return ResponseEntity.noContent().build();
+  }
 }
