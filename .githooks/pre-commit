@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+if [ -x ./gradlew ]; then
+    ./gradlew compileJava compileTestJava --no-daemon
+else
+    gradlew.bat compileJava compileTestJava --no-daemon
+fi
