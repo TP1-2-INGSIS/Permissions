@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+if [ -x ./gradlew ]; then
+    ./gradlew check jacocoTestReport --no-daemon
+else
+    gradlew.bat check jacocoTestReport --no-daemon
+fi
