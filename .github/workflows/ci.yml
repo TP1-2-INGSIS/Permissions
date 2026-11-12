@@ -4,14 +4,11 @@ on:
   pull_request:
     branches: [main, dev]
   push:
-    branches: [main, 'feature/**', 'feat/**']
-
-permissions:
-  contents: read
+    branches: [main, dev]
 
 jobs:
-  build:
-    name: Build and test
+  test:
+    name: Test & Verify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,17 +20,15 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Gradle
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run tests and enforce 80% line coverage
-        run: ./gradlew clean check jacocoTestReport --no-daemon
+      - name: Run Tests & Verification
+        run: ./gradlew check
 
-      - name: Upload JaCoCo report
-        if: always()
+      - name: Upload JaCoCo Coverage Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: jacoco-report
-          path: build/reports/jacoco/test
-          if-no-files-found: ignore
-
+          path: build/reports/jacoco/test/html

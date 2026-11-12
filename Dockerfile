@@ -1,13 +1,17 @@
+# ==========================================
+# 1. Build Stage (Gradle + JDK 21)
+# ==========================================
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
 
-# Cache Gradle dependencies before copying application sources.
+# Copiar configuración de Gradle primero para cachear dependencias
 COPY gradlew gradlew
 COPY gradle gradle
-COPY buildSrc buildSrc
-COPY build.gradle settings.gradle gradle.properties ./
+COPY build.gradle settings.gradle ./
+
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 
+# Copiar el código fuente y empaquetar el JAR ejecutable
 COPY src src
 RUN ./gradlew bootJar -x test --no-daemon
 
