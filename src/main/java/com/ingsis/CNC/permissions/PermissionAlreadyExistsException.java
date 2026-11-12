@@ -1,0 +1,17 @@
+package com.ingsis.CNC.permissions;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+@ResponseStatus(HttpStatus.CONFLICT)
+public class PermissionAlreadyExistsException extends ResponseStatusException {
+
+  public PermissionAlreadyExistsException() {
+    this("Permission already exists");
+  }
+
+  public PermissionAlreadyExistsException(String message) {
+    super(HttpStatus.CONFLICT, message);
+  }
+}
