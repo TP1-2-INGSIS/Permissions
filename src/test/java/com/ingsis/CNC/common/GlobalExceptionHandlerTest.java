@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.ingsis.CNC.permissions.PermissionAlreadyExistsException;
 import com.ingsis.CNC.permissions.dto.ErrorResponse;
+import com.ingsis.CNC.user.UsersProviderException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -36,5 +37,15 @@ class GlobalExceptionHandlerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     assertThat(response.getBody())
         .isEqualTo(new ErrorResponse("ALREADY_EXISTS", "Permission already exists", List.of()));
+  }
+
+  @Test
+  void handlesUsersProviderExceptionAsBadGateway() {
+    ResponseEntity<ErrorResponse> response =
+        handler.handleUsersProvider(new UsersProviderException("Auth0 down"));
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_GATEWAY);
+    assertThat(response.getBody())
+        .isEqualTo(new ErrorResponse("USERS_PROVIDER_ERROR", "Auth0 down", List.of()));
   }
 }

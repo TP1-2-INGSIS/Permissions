@@ -1,65 +1,37 @@
 package com.ingsis.CNC.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.ingsis.CNC.user.dto.UserSummaryResponse;
 import java.util.List;
-import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-  @Mock private UserRepository userRepository;
+  @Mock private UserDirectory directory;
 
-  private UserService userService;
+  @Test
+  void delegatesToDirectory() {
+    List<UserSummaryResponse> users = List.of(new UserSummaryResponse("id", "ana", "a@x.com"));
+    when(directory.search("ana", 5)).thenReturn(users);
 
-  @BeforeEach
-  void setUp() {
-    userService = new UserService(userRepository);
+    assertThat(new UserService(directory).searchUsers("ana", 5)).isEqualTo(users);
   }
 
   @Test
-  void searchUsersMapsEntityToResponse() {
-    User user = new User("ana", "ana@mail.com", "pass");
-    user.setId(UUID.randomUUID());
+  void clampsLimitAndNormalizesNullSearch() {
+    UserService service = new UserService(directory);
 
-    when(userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            eq("ana"), eq("ana"), any(Pageable.class)))
-        .thenReturn(List.of(user));
+    service.searchUsers(null, 0);
+    service.searchUsers("x", 1000);
 
-    List<UserSummaryResponse> results = userService.searchUsers("ana", 10);
-
-    assertThat(results).hasSize(1);
-    assertThat(results.get(0).id()).isEqualTo(user.getId().toString());
-    assertThat(results.get(0).name()).isEqualTo("ana");
-    assertThat(results.get(0).email()).isEqualTo("ana@mail.com");
-  }
-
-  @Test
-  void searchUsersClampsLimitBetweenOneAndOneHundred() {
-    ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
-
-    userService.searchUsers("query", 200);
-    verify(userRepository)
-        .findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            eq("query"), eq("query"), captor.capture());
-    assertThat(captor.getValue().getPageSize()).isEqualTo(100);
-
-    userService.searchUsers("query", 0);
-    verify(userRepository, org.mockito.Mockito.times(2))
-        .findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            eq("query"), eq("query"), captor.capture());
-    assertThat(captor.getValue().getPageSize()).isEqualTo(10);
+    verify(directory).search("", 10);
+    verify(directory).search("x", 100);
   }
 }

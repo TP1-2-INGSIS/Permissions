@@ -10,8 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.ingsis.CNC.TestcontainersConfiguration;
-import com.ingsis.CNC.user.User;
-import com.ingsis.CNC.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,12 +33,9 @@ class SnippetPermissionControllerTest {
 
   @Autowired private SnippetPermissionRepository snippetPermissionRepository;
 
-  @Autowired private UserRepository userRepository;
-
   @BeforeEach
   void setUp() {
     snippetPermissionRepository.deleteAll();
-    userRepository.deleteAll();
   }
 
   @Test
@@ -297,40 +292,12 @@ class SnippetPermissionControllerTest {
   }
 
   @Test
-  @DisplayName("GET /users?search=ana returns list of matching UserSummaryResponse")
-  void searchUsersShouldReturnMatchingUserSummaryResponseList() throws Exception {
-    User savedUser = userRepository.save(new User("ana", "ana@example.com", "dummy-hash"));
-
+  @DisplayName("GET /users returns an empty list with the default none provider")
+  void searchUsersWithNoneProviderShouldReturnEmptyList() throws Exception {
     mockMvc
         .perform(get("/users").param("search", "ana"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].id", is(savedUser.getId().toString())))
-        .andExpect(jsonPath("$[0].name", is("ana")))
-        .andExpect(jsonPath("$[0].email", is("ana@example.com")));
-  }
-
-  @Test
-  @DisplayName("GET /users?search=notfound returns empty list when no users match")
-  void searchUsersWhenNoMatchShouldReturnEmptyList() throws Exception {
-    userRepository.save(new User("ana", "ana@example.com", "dummy-hash"));
-
-    mockMvc
-        .perform(get("/users").param("search", "notfound"))
-        .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(0)));
-  }
-
-  @Test
-  @DisplayName("GET /users?search=ana&limit=1 respects limit parameter")
-  void searchUsersWithLimitShouldReturnLimitedList() throws Exception {
-    userRepository.save(new User("ana1", "ana1@example.com", "dummy-hash-1"));
-    userRepository.save(new User("ana2", "ana2@example.com", "dummy-hash-2"));
-
-    mockMvc
-        .perform(get("/users").param("search", "ana").param("limit", "1"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)));
   }
 
   @Test
