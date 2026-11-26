@@ -2,6 +2,7 @@ package com.ingsis.CNC.common;
 
 import com.ingsis.CNC.permissions.PermissionAlreadyExistsException;
 import com.ingsis.CNC.permissions.dto.ErrorResponse;
+import com.ingsis.CNC.user.UsersProviderException;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -28,5 +29,11 @@ public class GlobalExceptionHandler {
       DataIntegrityViolationException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ErrorResponse("ALREADY_EXISTS", "Permission already exists", List.of()));
+  }
+
+  @ExceptionHandler(UsersProviderException.class)
+  public ResponseEntity<ErrorResponse> handleUsersProvider(UsersProviderException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+        .body(new ErrorResponse("USERS_PROVIDER_ERROR", ex.getMessage(), List.of()));
   }
 }

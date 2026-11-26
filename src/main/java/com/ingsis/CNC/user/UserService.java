@@ -2,32 +2,22 @@ package com.ingsis.CNC.user;
 
 import com.ingsis.CNC.user.dto.UserSummaryResponse;
 import java.util.List;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 public class UserService {
 
-  private final UserRepository userRepository;
+  private static final int DEFAULT_LIMIT = 10;
+  private static final int MAX_LIMIT = 100;
 
-  public UserService(UserRepository userRepository) {
-    this.userRepository = userRepository;
+  private final UserDirectory userDirectory;
+
+  public UserService(UserDirectory userDirectory) {
+    this.userDirectory = userDirectory;
   }
 
   public List<UserSummaryResponse> searchUsers(String search, int limit) {
-    int pageSize = Math.min(limit > 0 ? limit : 10, 100);
-    Pageable pageable = PageRequest.of(0, pageSize);
-    String term = search != null ? search : "";
-    List<User> users =
-        userRepository.findByUserNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-            term, term, pageable);
-    return users.stream()
-        .map(u ->
-            new UserSummaryResponse(
-                u.getId() != null ? u.getId().toString() : null, u.getUserName(), u.getEmail()))
-        .toList();
+    int pageSize = Math.min(limit > 0 ? limit : DEFAULT_LIMIT, MAX_LIMIT);
+    return userDirectory.search(search != null ? search : "", pageSize);
   }
 }
